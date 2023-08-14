@@ -22,5 +22,6 @@ async fn main() -> Result<()> {
 
     let exit_status = child.wait().await?;
 
+    // Exit with the same exit code as the child process.
     exit(exit_status.code().unwrap_or(1));
 }
