@@ -17,14 +17,10 @@ async fn main() -> Result<()> {
     let cwd = env::current_dir()?
         .join(dir_name);
 
-    println!("Current working directory: {:?}", cwd);
-
     if let Err(e) = std::fs::create_dir(cwd.clone()) {
         if e.kind() != std::io::ErrorKind::AlreadyExists {
             return Err(e.into());
         }
-    } else {
-        println!("Created directory '{:?}'", cwd);
     }
 
     let dev_null = cwd.clone().join("dev/null");
@@ -33,8 +29,6 @@ async fn main() -> Result<()> {
         if e.kind() != std::io::ErrorKind::AlreadyExists {
             return Err(e.into());
         }
-    } else {
-        println!("Created directory '{}'", dev_null.clone().parent().unwrap().to_str().unwrap());
     }
 
     unsafe {
@@ -42,8 +36,6 @@ async fn main() -> Result<()> {
             cwd.clone().as_os_str().as_bytes().to_vec().as_slice(),
         ).as_ptr())
     };
-
-    println!("Changed root to '{}'", cwd.as_os_str().to_str().unwrap());
 
     env::set_current_dir(cwd.clone()).with_context(|| {
         format!("Tried to change directory to '/'")
