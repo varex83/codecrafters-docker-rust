@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
 
     generate_chroot_dir(&dir_name).await?;
 
-    copy_binaries_to_chroot(&dir_name).await?;
+    copy_binaries_to_chroot(command.clone(), &dir_name).await?;
 
     change_root(&dir_name)?;
 
@@ -54,7 +54,7 @@ async fn generate_chroot_dir(dir_name: &str) -> Result<()> {
 
     File::create(dev_null.clone()).await?;
 
-    let bin = cwd.clone().join("bin");
+    let bin = cwd.clone().join("usr/local/bin");
 
     create_dir_all(bin.clone()).await?;
 
@@ -78,11 +78,10 @@ fn change_root(dir_name: &str) -> Result<()> {
     Ok(())
 }
 
-async fn copy_binaries_to_chroot(dir_name: &str) -> Result<()> {
-    let bin_path = Path::new("/usr/local/bin/docker-explorer");
+async fn copy_binaries_to_chroot(cmd: String, dir_name: &str) -> Result<()> {
+    let bin_path = Path::new(cmd.as_str());
     let dest_path = Path::new(dir_name)
-        .join("bin")
-        .join(bin_path.file_name().unwrap());
+        .join(cmd.trim_start_matches("/"));
 
     tokio::fs::copy(bin_path, &dest_path).await
         .with_context(|| format!("Failed to copy from '{}' to '{}'", bin_path.display(), dest_path.display()))?;
