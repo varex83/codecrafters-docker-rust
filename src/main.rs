@@ -1,7 +1,6 @@
 use std::env;
 use std::ffi::CStr;
 use std::os::unix::ffi::OsStrExt;
-use std::path::Path;
 use std::process::{exit, Stdio};
 use anyhow::{Context, Result};
 use tokio::process::Command;
@@ -15,7 +14,8 @@ async fn main() -> Result<()> {
 
     let dir_name = "rootfs";
 
-    let cwd = Path::new(dir_name);
+    let cwd = env::current_dir()?
+        .join(dir_name);
 
     println!("Current working directory: {:?}", cwd);
 
@@ -24,7 +24,17 @@ async fn main() -> Result<()> {
             return Err(e.into());
         }
     } else {
-        println!("Created directory '{}'", dir_name);
+        println!("Created directory '{:?}'", cwd);
+    }
+
+    let dev_null = cwd.clone().join("dev/null");
+
+    if let Err(e) = std::fs::create_dir_all(dev_null.clone().parent().unwrap()) {
+        if e.kind() != std::io::ErrorKind::AlreadyExists {
+            return Err(e.into());
+        }
+    } else {
+        println!("Created directory '{}'", dev_null.clone().parent().unwrap().to_str().unwrap());
     }
 
     unsafe {
@@ -53,6 +63,5 @@ async fn main() -> Result<()> {
 
     let exit_status = child.wait().await?;
 
-    // Exit with the same exit code as the child process.
     exit(exit_status.code().unwrap_or(1));
 }
