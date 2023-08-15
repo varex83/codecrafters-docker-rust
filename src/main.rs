@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
         ).as_ptr())
     };
 
-    env::set_current_dir(cwd.clone()).with_context(|| {
+    env::set_current_dir("/").with_context(|| {
         format!("Tried to change directory to '/'")
     })?;
 
