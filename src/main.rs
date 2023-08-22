@@ -23,6 +23,12 @@ async fn main() -> Result<()> {
 
     change_root(&dir_name)?;
 
+    #[cfg(target_os = "linux")]
+    unsafe {
+        libc::unshare(libc::CLONE_NEWPID);
+        1
+    }
+
     let mut child = Command::new(command)
         .args(command_args)
         .stdout(Stdio::inherit())
