@@ -26,8 +26,7 @@ async fn main() -> Result<()> {
     #[cfg(target_os = "linux")]
     unsafe {
         libc::unshare(libc::CLONE_NEWPID);
-        1
-    }
+    };
 
     let mut child = Command::new(command)
         .args(command_args)
